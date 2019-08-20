@@ -1491,7 +1491,7 @@ void TaylorT4::solorb(){
 
 double TaylorT4::get_eref(){
 	double yref = pow(2*M_PI*M*5, 1./3.);
-	int size = ysol.size();
+	int size = ysol.size()*0.9;
 	//convert the solutions to things gsl takes
 	double *esol_mat, *ysol_mat;
 	esol_mat = (double*)malloc(sizeof(double) * size);
