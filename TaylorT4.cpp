@@ -1483,6 +1483,8 @@ void TaylorT4::solorb(){
 			cout << "final stop cond = " << stop_cond(ysol[i], esol[i]) << endl;
 			app = i - 1;
 			break;
+		} else {
+			app = i;
 		}
 	}
 	tsol.resize(app);
@@ -1538,8 +1540,8 @@ void TaylorT4::sol_orb_e_param(){
 
 void TaylorT4::sol_orb_e_param_6(){
 	cout << "Solving ODEs (parameterized in terms of e) for e0 = " << e0 << "and p0 = " << p0 << endl;
-	double dep = (double) (e0)/200000;
-	int N = (int) 200000;
+	double dep = (double) (e0)/210000;
+	int N = (int) 210000;
 	int i = 0;
 	tsol.clear();
 	lsol.clear();
@@ -1675,6 +1677,8 @@ void TaylorT4::sol_orb_e_param_6(){
 			cout << "final stop cond = " << stop_cond(ysol[i], esol[i]) << endl;
 			app = i - 1;
 			break;
+		} else {
+			app = i;
 		}
 	}
 	tsol.resize(app);
@@ -1691,9 +1695,9 @@ void TaylorT4::sol_orb_e_param_6(){
 
     usol.clear();
     wsol.clear();
-    usol.resize(len);
-    wsol.resize(len);
-    cout << "len = " << len << endl;
+    usol.resize(app);
+    wsol.resize(app);
+    cout << "len = " << app << endl;
     for(int i = 0; i < usol.size(); i++){
     	usol[i] = get_u3PN(lsol[i], esol[i], ysol[i]);
     	wsol[i] = get_W(lsol[i], esol[i], ysol[i], usol[i]);
@@ -2773,7 +2777,7 @@ vector<vector<double> > TaylorT4::get_hfsol_downsamp(double fend, double df_lim)
 vector<vector<double> > TaylorT4::get_hfsol_downsamp_e(double fend, double df_lim){
 	make_T4_e();
 
-
+	cout << "here" << endl;
 	//decide how much to downsample
 	int factor = 1;
 	double df = h_T4_f[1][0];
