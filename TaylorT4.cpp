@@ -1385,10 +1385,11 @@ void TaylorT4::solorb(){
         {
         	cout << t*M << '\t' << x[0] << '\t' << x[1] << '\t' << x[2] << '\t' << x[3] << endl;
         	cout << "stop cond = " << stop_cond(ysol[i-1], esol[i-1]) << endl;
-            while(t < stepper.current_time() & stop_cond(ysol[i-1], esol[i-1]) < 0) //Makes sure to get solution leading up to stop condition
+            while(t < stepper.current_time() & stop_cond(ysol[i-1], esol[i-1]) > 0) //Makes sure to get solution leading up to stop condition
             {
+            	cout << "stop cond = " << stop_cond(ysol[i-1], esol[i-1]) << endl;
             	stepper.calc_state( t , x );
-            	if (i <= N){
+            	if (i < N){
             		tsol[i] = t*M;
             		lsol[i] = x[0];
             		lamsol[i] = x[1];
@@ -1396,7 +1397,7 @@ void TaylorT4::solorb(){
             		esol[i] = x[3];
             		t += dt;
             		i++;
-            	} else if (i > N){
+            	} else if (i >= N){
                     tsol.push_back (t*M);
                 	lsol.push_back (x[0]);
                 	lamsol.push_back (x[1]);
@@ -1471,13 +1472,24 @@ void TaylorT4::solorb(){
 	ysol.resize(len);
 	esol.resize(len);
 
+	int app = 0;
 	for(int i = 0; i < len; i++){
 		tsol[i] = (double) 1/sr*i;
 		esol[i] = gsl_spline_eval(spline_e_t, tsol[i], acc); //get the eccentricities associated with sampling the signal at sr.
 		lsol[i] = gsl_spline_eval(spline_l_t, tsol[i], acc); // use them to evaluate the other functions
 		lamsol[i] = gsl_spline_eval(spline_lam_t, tsol[i], acc);
 		ysol[i] = gsl_spline_eval(spline_y_t, tsol[i], acc);
+		if(stop_cond(ysol[i], esol[i]) > 0){
+			cout << "final stop cond = " << stop_cond(ysol[i], esol[i]) << endl;
+			app = i - 1;
+			break;
+		}
 	}
+	tsol.resize(app);
+	lsol.resize(app);
+	lamsol.resize(app);
+	ysol.resize(app);
+	esol.resize(app);
 
 	gsl_spline_free(spline_e_t);
 	gsl_spline_free(spline_l_t);
@@ -1491,7 +1503,7 @@ void TaylorT4::solorb(){
 
 double TaylorT4::get_eref(){
 	double yref = pow(2*M_PI*M*5, 1./3.);
-	int size = ysol.size()*0.98;
+	int size = ysol.size()*0.995;
 	//convert the solutions to things gsl takes
 	double *esol_mat, *ysol_mat;
 	esol_mat = (double*)malloc(sizeof(double) * size);
@@ -1652,13 +1664,24 @@ void TaylorT4::sol_orb_e_param_6(){
 	ysol.resize(len);
 	esol.resize(len);
 
+	int app = 0;
 	for(int i = 0; i < len; i++){
 		tsol[i] = (double) 1/sr*i;
 		esol[i] = gsl_spline_eval(spline_e_t, tsol[i], acc); //get the eccentricities associated with sampling the signal at sr.
 		lsol[i] = gsl_spline_eval(spline_l_e, esol[i], acc); // use them to evaluate the other functions
 		lamsol[i] = gsl_spline_eval(spline_lam_e, esol[i], acc);
 		ysol[i] = gsl_spline_eval(spline_y_e, esol[i], acc);
+		if(stop_cond(ysol[i], esol[i]) > 0){
+			cout << "final stop cond = " << stop_cond(ysol[i], esol[i]) << endl;
+			app = i - 1;
+			break;
+		}
 	}
+	tsol.resize(app);
+	lsol.resize(app);
+	lamsol.resize(app);
+	ysol.resize(app);
+	esol.resize(app);
 
 	gsl_spline_free(spline_e_t);
 	gsl_spline_free(spline_l_e);
@@ -2159,6 +2182,7 @@ void TaylorT4::fill_all(){
     	usol[i] = get_u3PN(lsol[i], esol[i], ysol[i]);
     	wsol[i] = get_W(lsol[i], esol[i], ysol[i], usol[i]);
     }
+    cout << "Filled u and w" << endl;
 }
 
 ////////////////////////////////////////////////////////////////
@@ -2393,6 +2417,7 @@ void TaylorT4::sol_h(){
 	for(int i = 0; i < N; i++){
 		hsol[i] = h_0(ysol[i], esol[i], usol[i], wsol[i], lamsol[i]);
 	}
+	cout << "sampled h(t)" << endl;
 }
 
 //Solve h(t), vectorized, at "pn" order (up to 2)
@@ -2474,6 +2499,7 @@ vector<double> TaylorT4::pad_h(){
 	for(int i = padL - 1; i < hsol.size() + padL - 1 ; i++){
 		paddedht[i] = hsol[i - (padL - 1)];
 	}
+	cout << "padded h(t)" << endl;
 	return paddedht;
 }
 vector<double> TaylorT4::pad_h_e(){
