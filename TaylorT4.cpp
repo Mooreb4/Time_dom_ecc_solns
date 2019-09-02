@@ -1328,9 +1328,13 @@ void TaylorT4::solorb(){
 	esol[0] = x[3];
 	t += dt;
 	i++;
+	double tenth_dt = dt/10;
 	auto mystate = bind(&TaylorT4::rhs, *this , pl::_1 , pl::_2 , pl::_3);
     while( t < 2*t_end  )
     {
+    	if(x[2] > 0.2){
+    		dt = tenth_dt;
+    	}
         if( t > stepper.current_time() ) // an actual ode step
         {
         	stepper.do_step( mystate );
@@ -1345,6 +1349,8 @@ void TaylorT4::solorb(){
         		stepper.do_step( mystate );
         		stepper.calc_state( stepper.current_time() , x );
         	}
+//            cout << "i = " << i << endl;
+//            cout << t*M << '\t' << x[0] << '\t' << x[1] << '\t' << x[2] << '\t' << x[3] << endl;
         }
         else if (i < N) // a dense output step (i.e. interpolated solutions)
         {
@@ -1597,9 +1603,9 @@ void TaylorT4::sol_orb_e_param_6(){
             i++;
         }
         if(stop_cond(ysol[i - 1], esol[i - 1]) > 0){
-        	cout << "LSO reached" << endl;
-        	cout << "Stop condition = " << stop_cond(ysol[i - 1], esol[i - 1]) << endl;
-        	cout << setprecision(8) << -ep << '\t' << x[0] << '\t' << x[1] << '\t' << x[2] << '\t' << x[3] << endl;
+//        	cout << "LSO reached" << endl;
+//        	cout << "Stop condition = " << stop_cond(ysol[i - 1], esol[i - 1]) << endl;
+//        	cout << setprecision(8) << -ep << '\t' << x[0] << '\t' << x[1] << '\t' << x[2] << '\t' << x[3] << endl;
         	tsol.erase(tsol.begin()+i, tsol.begin()+N);
         	lsol.erase(lsol.begin()+i, lsol.begin()+N);
         	lamsol.erase(lamsol.begin()+i, lamsol.begin()+N);
